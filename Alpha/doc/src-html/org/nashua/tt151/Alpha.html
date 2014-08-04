@@ -1,0 +1,197 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en">
+<head>
+<title>Source code</title>
+<link rel="stylesheet" type="text/css" href="../../../../stylesheet.css" title="Style">
+</head>
+<body>
+<div class="sourceContainer">
+<pre><span class="sourceLineNo">001</span>package org.nashua.tt151;<a name="line.1"></a>
+<span class="sourceLineNo">002</span><a name="line.2"></a>
+<span class="sourceLineNo">003</span><a name="line.3"></a>
+<span class="sourceLineNo">004</span>import edu.wpi.first.wpilibj.Encoder;<a name="line.4"></a>
+<span class="sourceLineNo">005</span>import edu.wpi.first.wpilibj.Gyro;<a name="line.5"></a>
+<span class="sourceLineNo">006</span>import edu.wpi.first.wpilibj.Relay.Direction;<a name="line.6"></a>
+<span class="sourceLineNo">007</span>import edu.wpi.first.wpilibj.SimpleRobot;<a name="line.7"></a>
+<span class="sourceLineNo">008</span>import java.io.IOException;<a name="line.8"></a>
+<span class="sourceLineNo">009</span>import org.nashua.tt151.RobotMap.Controls;<a name="line.9"></a>
+<span class="sourceLineNo">010</span>import org.nashua.tt151.libraries.Controller.DualAction;<a name="line.10"></a>
+<span class="sourceLineNo">011</span>import org.nashua.tt151.wrappers.Jaguar;<a name="line.11"></a>
+<span class="sourceLineNo">012</span>import org.nashua.tt151.wrappers.Relay;<a name="line.12"></a>
+<span class="sourceLineNo">013</span>import org.nashua.tt151.wrappers.Servo;<a name="line.13"></a>
+<span class="sourceLineNo">014</span><a name="line.14"></a>
+<span class="sourceLineNo">015</span>public class Alpha extends SimpleRobot {<a name="line.15"></a>
+<span class="sourceLineNo">016</span>    // Logitech DualAction F310 Controllers - D Mode<a name="line.16"></a>
+<span class="sourceLineNo">017</span>    DualAction driver = new DualAction(Controls.Driver.SLOT);<a name="line.17"></a>
+<span class="sourceLineNo">018</span>    DualAction shooter = new DualAction(Controls.Shooter.SLOT);<a name="line.18"></a>
+<span class="sourceLineNo">019</span>    // Speed Controllers<a name="line.19"></a>
+<span class="sourceLineNo">020</span>    Jaguar back = new Jaguar(RobotMap.Jaguar.BACK);<a name="line.20"></a>
+<span class="sourceLineNo">021</span>    Jaguar backLeft = new Jaguar(RobotMap.Jaguar.BACK_LEFT);<a name="line.21"></a>
+<span class="sourceLineNo">022</span>    Jaguar backRight = new Jaguar(RobotMap.Jaguar.BACK_RIGHT);<a name="line.22"></a>
+<span class="sourceLineNo">023</span>    Jaguar front = new Jaguar(RobotMap.Jaguar.FRONT);<a name="line.23"></a>
+<span class="sourceLineNo">024</span>    Jaguar frontLeft = new Jaguar(RobotMap.Jaguar.FRONT_LEFT);<a name="line.24"></a>
+<span class="sourceLineNo">025</span>    Jaguar frontRight = new Jaguar(RobotMap.Jaguar.FRONT_RIGHT);<a name="line.25"></a>
+<span class="sourceLineNo">026</span>    // Relays<a name="line.26"></a>
+<span class="sourceLineNo">027</span>    Relay led = new Relay(RobotMap.Relay.LED, Direction.kForward);<a name="line.27"></a>
+<span class="sourceLineNo">028</span>    // Servos<a name="line.28"></a>
+<span class="sourceLineNo">029</span>    Servo cameraServo = new Servo(RobotMap.Servo.Camera.SLOT);<a name="line.29"></a>
+<span class="sourceLineNo">030</span>    // Analog<a name="line.30"></a>
+<span class="sourceLineNo">031</span>    Gyro gyro = new Gyro(RobotMap.Analog.Gyro.SLOT);<a name="line.31"></a>
+<span class="sourceLineNo">032</span>    // Dashboard<a name="line.32"></a>
+<span class="sourceLineNo">033</span>    Dash dash = null;<a name="line.33"></a>
+<span class="sourceLineNo">034</span>    // Encoders<a name="line.34"></a>
+<span class="sourceLineNo">035</span>    Encoder leftEncoder = new Encoder(RobotMap.Encoder.Left.MODULE_A, RobotMap.Encoder.Left.SLOT_A,<a name="line.35"></a>
+<span class="sourceLineNo">036</span>            RobotMap.Encoder.Left.MODULE_B, RobotMap.Encoder.Left.SLOT_B, RobotMap.Encoder.Left.REVERSED);<a name="line.36"></a>
+<span class="sourceLineNo">037</span>    public void autonomous() {<a name="line.37"></a>
+<span class="sourceLineNo">038</span>        <a name="line.38"></a>
+<span class="sourceLineNo">039</span>    }<a name="line.39"></a>
+<span class="sourceLineNo">040</span>    private void connectToDashboard() {<a name="line.40"></a>
+<span class="sourceLineNo">041</span>        new Thread() {<a name="line.41"></a>
+<span class="sourceLineNo">042</span>            public void run() {<a name="line.42"></a>
+<span class="sourceLineNo">043</span>                try {<a name="line.43"></a>
+<span class="sourceLineNo">044</span>                    dash = new Dash("10.1.53.5", new Dash.ConnectionListener() {<a name="line.44"></a>
+<span class="sourceLineNo">045</span>                        public void onConnect() {<a name="line.45"></a>
+<span class="sourceLineNo">046</span>                            System.out.println("[Connected]");<a name="line.46"></a>
+<span class="sourceLineNo">047</span>                        }<a name="line.47"></a>
+<span class="sourceLineNo">048</span>                        public void onDisconnect() {<a name="line.48"></a>
+<span class="sourceLineNo">049</span>                            System.out.println("[Disconnected]");<a name="line.49"></a>
+<span class="sourceLineNo">050</span>                            dash = null;<a name="line.50"></a>
+<span class="sourceLineNo">051</span>                        }<a name="line.51"></a>
+<span class="sourceLineNo">052</span>                        public void onDataReceived(String msg) {<a name="line.52"></a>
+<span class="sourceLineNo">053</span>                            System.out.println("[MSG "+msg+"]");<a name="line.53"></a>
+<span class="sourceLineNo">054</span>                        }<a name="line.54"></a>
+<span class="sourceLineNo">055</span>                    });<a name="line.55"></a>
+<span class="sourceLineNo">056</span>                } catch (IOException ex) {<a name="line.56"></a>
+<span class="sourceLineNo">057</span>                    System.err.println("Failed to connect to dashboard: "+ex.getMessage());<a name="line.57"></a>
+<span class="sourceLineNo">058</span>                }<a name="line.58"></a>
+<span class="sourceLineNo">059</span>            }<a name="line.59"></a>
+<span class="sourceLineNo">060</span>        }.start();<a name="line.60"></a>
+<span class="sourceLineNo">061</span>    }<a name="line.61"></a>
+<span class="sourceLineNo">062</span>    public void disabled() {<a name="line.62"></a>
+<span class="sourceLineNo">063</span>        if (dash==null) {<a name="line.63"></a>
+<span class="sourceLineNo">064</span>            connectToDashboard();<a name="line.64"></a>
+<span class="sourceLineNo">065</span>        }<a name="line.65"></a>
+<span class="sourceLineNo">066</span>    }<a name="line.66"></a>
+<span class="sourceLineNo">067</span>    public void operatorControl() {<a name="line.67"></a>
+<span class="sourceLineNo">068</span>        while (isEnabled() &amp;&amp; isOperatorControl()) {<a name="line.68"></a>
+<span class="sourceLineNo">069</span>            driver.queryButtons();<a name="line.69"></a>
+<span class="sourceLineNo">070</span>            shooter.queryButtons();<a name="line.70"></a>
+<span class="sourceLineNo">071</span>            <a name="line.71"></a>
+<span class="sourceLineNo">072</span>            // Arcade Drive For An Omni Drive Train<a name="line.72"></a>
+<span class="sourceLineNo">073</span>            double vertical = driver.getRawAxis(Controls.Driver.Axis.DRIVE_VERTICAL);<a name="line.73"></a>
+<span class="sourceLineNo">074</span>            double horizontal = driver.getRawAxis(Controls.Driver.Axis.DRIVE_SIDEWAYS);<a name="line.74"></a>
+<span class="sourceLineNo">075</span>            backLeft.set(vertical);<a name="line.75"></a>
+<span class="sourceLineNo">076</span>            backRight.set(-vertical);<a name="line.76"></a>
+<span class="sourceLineNo">077</span>            frontLeft.set(vertical);<a name="line.77"></a>
+<span class="sourceLineNo">078</span>            frontRight.set(-vertical);<a name="line.78"></a>
+<span class="sourceLineNo">079</span>            front.set(horizontal);<a name="line.79"></a>
+<span class="sourceLineNo">080</span>            back.set(-horizontal);<a name="line.80"></a>
+<span class="sourceLineNo">081</span>            <a name="line.81"></a>
+<span class="sourceLineNo">082</span>            // LED Control<a name="line.82"></a>
+<span class="sourceLineNo">083</span>            if (shooter.wasReleased(Controls.Shooter.Buttons.LED_ON)) {<a name="line.83"></a>
+<span class="sourceLineNo">084</span>                led.set(edu.wpi.first.wpilibj.Relay.Value.kOn);<a name="line.84"></a>
+<span class="sourceLineNo">085</span>            }<a name="line.85"></a>
+<span class="sourceLineNo">086</span>            if (shooter.wasReleased(Controls.Shooter.Buttons.LED_OFF)) {<a name="line.86"></a>
+<span class="sourceLineNo">087</span>                led.set(edu.wpi.first.wpilibj.Relay.Value.kOff);<a name="line.87"></a>
+<span class="sourceLineNo">088</span>            }<a name="line.88"></a>
+<span class="sourceLineNo">089</span>            <a name="line.89"></a>
+<span class="sourceLineNo">090</span>            cameraServo.set((shooter.getRawAxis(RobotMap.Controls.Shooter.Axis.CAMERA_ANGLE)+1)/2.0);<a name="line.90"></a>
+<span class="sourceLineNo">091</span>            <a name="line.91"></a>
+<span class="sourceLineNo">092</span>            double encoder = leftEncoder.getDistance();<a name="line.92"></a>
+<span class="sourceLineNo">093</span>            System.out.println("Encoder "+(int)(encoder/12)+"' "+(encoder%12)+"\"");<a name="line.93"></a>
+<span class="sourceLineNo">094</span>        }<a name="line.94"></a>
+<span class="sourceLineNo">095</span>    }<a name="line.95"></a>
+<span class="sourceLineNo">096</span>    public void robotInit() {<a name="line.96"></a>
+<span class="sourceLineNo">097</span>        gyro.setSensitivity(RobotMap.Analog.Gyro.SENSITIVITY);<a name="line.97"></a>
+<span class="sourceLineNo">098</span>        gyro.reset();<a name="line.98"></a>
+<span class="sourceLineNo">099</span>        leftEncoder.start();<a name="line.99"></a>
+<span class="sourceLineNo">100</span>        leftEncoder.setDistancePerPulse(RobotMap.Encoder.Left.DIAMETER_OF_WHEEL*Math.PI*RobotMap.Encoder.Left.SCALE_FACTOR/(RobotMap.Encoder.Left.GEAR_RATIO*RobotMap.Encoder.Left.RESOLUTION));<a name="line.100"></a>
+<span class="sourceLineNo">101</span>        connectToDashboard();<a name="line.101"></a>
+<span class="sourceLineNo">102</span>        new java.util.Timer().scheduleAtFixedRate(new java.util.TimerTask(){<a name="line.102"></a>
+<span class="sourceLineNo">103</span>            public void run() {<a name="line.103"></a>
+<span class="sourceLineNo">104</span>                if (dash!=null) {<a name="line.104"></a>
+<span class="sourceLineNo">105</span>                    try {<a name="line.105"></a>
+<span class="sourceLineNo">106</span>                        dash.sendPWM(back.getRaw(), "Back", back.getModuleNumber(), back.getChannel(), Dash.PWMType.JAGUAR);<a name="line.106"></a>
+<span class="sourceLineNo">107</span>                        dash.sendPWM(backLeft.getRaw(), "Back Left", backLeft.getModuleNumber(), backLeft.getChannel(), Dash.PWMType.JAGUAR);<a name="line.107"></a>
+<span class="sourceLineNo">108</span>                        dash.sendPWM(backRight.getRaw(), "Back Right", backRight.getModuleNumber(), backRight.getChannel(), Dash.PWMType.JAGUAR);<a name="line.108"></a>
+<span class="sourceLineNo">109</span>                        dash.sendPWM(front.getRaw(), "Front", front.getModuleNumber(), front.getChannel(), Dash.PWMType.JAGUAR);<a name="line.109"></a>
+<span class="sourceLineNo">110</span>                        dash.sendPWM(frontLeft.getRaw(), "Front Left", frontLeft.getModuleNumber(), frontLeft.getChannel(), Dash.PWMType.JAGUAR);<a name="line.110"></a>
+<span class="sourceLineNo">111</span>                        dash.sendPWM(frontRight.getRaw(), "Front Right", frontRight.getModuleNumber(), frontRight.getChannel(), Dash.PWMType.JAGUAR);<a name="line.111"></a>
+<span class="sourceLineNo">112</span>                        <a name="line.112"></a>
+<span class="sourceLineNo">113</span>                        dash.sendAnalog((int)gyro.getAngle(), "Gyro", RobotMap.Analog.Gyro.SLOT, Dash.AnalogType.GYRO);<a name="line.113"></a>
+<span class="sourceLineNo">114</span>                        <a name="line.114"></a>
+<span class="sourceLineNo">115</span>                        dash.sendRelay(led.get(), "LED", RobotMap.Relay.LED[0], RobotMap.Relay.LED[1], led.getDirection());<a name="line.115"></a>
+<span class="sourceLineNo">116</span>                        <a name="line.116"></a>
+<span class="sourceLineNo">117</span>                        dash.sendCameraAngle(cameraServo.getAngle());<a name="line.117"></a>
+<span class="sourceLineNo">118</span>                    } catch (IOException ex) {<a name="line.118"></a>
+<span class="sourceLineNo">119</span>                        System.err.println("Failed to update dashboard: "+ex.getMessage());<a name="line.119"></a>
+<span class="sourceLineNo">120</span>                    }<a name="line.120"></a>
+<span class="sourceLineNo">121</span>                }<a name="line.121"></a>
+<span class="sourceLineNo">122</span>            }<a name="line.122"></a>
+<span class="sourceLineNo">123</span>        }, 1, 100);<a name="line.123"></a>
+<span class="sourceLineNo">124</span>    }<a name="line.124"></a>
+<span class="sourceLineNo">125</span>}<a name="line.125"></a>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</pre>
+</div>
+</body>
+</html>
